@@ -6,6 +6,18 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1BB4ABC72E3EF4BC0034BB03 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABBF2E3EF4BC0034BB03 /* HomeView.swift */; };
+		1BB4ABC82E3EF4BC0034BB03 /* MedTrack.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABC22E3EF4BC0034BB03 /* MedTrack.xcdatamodeld */; };
+		1BB4ABC92E3EF4BC0034BB03 /* MedTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABC32E3EF4BC0034BB03 /* MedTrackApp.swift */; };
+		1BB4ABCA2E3EF4BC0034BB03 /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABC42E3EF4BC0034BB03 /* Persistence.swift */; };
+		1BB4ABCB2E3EF4BC0034BB03 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1BB4ABBE2E3EF4BC0034BB03 /* Assets.xcassets */; };
+		1BB4ABE12E3EFC3F0034BB03 /* MedicineViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABE02E3EFC380034BB03 /* MedicineViewModel.swift */; };
+		1BB4ABE32E41298F0034BB03 /* AddMedicineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABE22E4129610034BB03 /* AddMedicineView.swift */; };
+		1BB4ABE52E4187190034BB03 /* EditMedicineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABE42E4187170034BB03 /* EditMedicineView.swift */; };
+		1BB4ABE72E44399E0034BB03 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABE62E4439930034BB03 /* NotificationManager.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		1BB4AB822E3EF43A0034BB03 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,27 +39,20 @@
 		1BB4AB6D2E3EF4380034BB03 /* MedTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MedTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BB4AB812E3EF43A0034BB03 /* MedTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BB4AB8B2E3EF43A0034BB03 /* MedTrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedTrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BB4ABBE2E3EF4BC0034BB03 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1BB4ABBF2E3EF4BC0034BB03 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		1BB4ABC02E3EF4BC0034BB03 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1BB4ABC12E3EF4BC0034BB03 /* MedTrack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MedTrack.entitlements; sourceTree = "<group>"; };
+		1BB4ABC32E3EF4BC0034BB03 /* MedTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedTrackApp.swift; sourceTree = "<group>"; };
+		1BB4ABC42E3EF4BC0034BB03 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		1BB4ABC62E3EF4BC0034BB03 /* MedTrack.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MedTrack.xcdatamodel; sourceTree = "<group>"; };
+		1BB4ABE02E3EFC380034BB03 /* MedicineViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineViewModel.swift; sourceTree = "<group>"; };
+		1BB4ABE22E4129610034BB03 /* AddMedicineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddMedicineView.swift; sourceTree = "<group>"; };
+		1BB4ABE42E4187170034BB03 /* EditMedicineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMedicineView.swift; sourceTree = "<group>"; };
+		1BB4ABE62E4439930034BB03 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		1BB4AB932E3EF43A0034BB03 /* Exceptions for "MedTrack" folder in "MedTrack" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 1BB4AB6C2E3EF4380034BB03 /* MedTrack */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		1BB4AB6F2E3EF4380034BB03 /* MedTrack */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				1BB4AB932E3EF43A0034BB03 /* Exceptions for "MedTrack" folder in "MedTrack" target */,
-			);
-			path = MedTrack;
-			sourceTree = "<group>";
-		};
 		1BB4AB842E3EF43A0034BB03 /* MedTrackTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = MedTrackTests;
@@ -88,7 +93,7 @@
 		1BB4AB642E3EF4380034BB03 = {
 			isa = PBXGroup;
 			children = (
-				1BB4AB6F2E3EF4380034BB03 /* MedTrack */,
+				1BB4ABC52E3EF4BC0034BB03 /* MedTrack */,
 				1BB4AB842E3EF43A0034BB03 /* MedTrackTests */,
 				1BB4AB8E2E3EF43A0034BB03 /* MedTrackUITests */,
 				1BB4AB6E2E3EF4380034BB03 /* Products */,
@@ -105,6 +110,64 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		1BB4ABC52E3EF4BC0034BB03 /* MedTrack */ = {
+			isa = PBXGroup;
+			children = (
+				1BB4ABDF2E3EF6050034BB03 /* Resources */,
+				1BB4ABDE2E3EF6000034BB03 /* Services */,
+				1BB4ABDD2E3EF5F70034BB03 /* ViewModels */,
+				1BB4ABDC2E3EF5F10034BB03 /* Views */,
+				1BB4ABDB2E3EF5E80034BB03 /* Models */,
+				1BB4ABC32E3EF4BC0034BB03 /* MedTrackApp.swift */,
+				1BB4ABC02E3EF4BC0034BB03 /* Info.plist */,
+				1BB4ABC12E3EF4BC0034BB03 /* MedTrack.entitlements */,
+			);
+			path = MedTrack;
+			sourceTree = "<group>";
+		};
+		1BB4ABDB2E3EF5E80034BB03 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1BB4ABC22E3EF4BC0034BB03 /* MedTrack.xcdatamodeld */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1BB4ABDC2E3EF5F10034BB03 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1BB4ABE42E4187170034BB03 /* EditMedicineView.swift */,
+				1BB4ABE22E4129610034BB03 /* AddMedicineView.swift */,
+				1BB4ABBF2E3EF4BC0034BB03 /* HomeView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1BB4ABDD2E3EF5F70034BB03 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				1BB4ABE02E3EFC380034BB03 /* MedicineViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		1BB4ABDE2E3EF6000034BB03 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1BB4ABE62E4439930034BB03 /* NotificationManager.swift */,
+				1BB4ABC42E3EF4BC0034BB03 /* Persistence.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		1BB4ABDF2E3EF6050034BB03 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1BB4ABBE2E3EF4BC0034BB03 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -119,9 +182,6 @@
 			buildRules = (
 			);
 			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				1BB4AB6F2E3EF4380034BB03 /* MedTrack */,
 			);
 			name = MedTrack;
 			packageProductDependencies = (
@@ -225,6 +285,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BB4ABCB2E3EF4BC0034BB03 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +310,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1BB4ABE52E4187190034BB03 /* EditMedicineView.swift in Sources */,
+				1BB4ABC72E3EF4BC0034BB03 /* HomeView.swift in Sources */,
+				1BB4ABE12E3EFC3F0034BB03 /* MedicineViewModel.swift in Sources */,
+				1BB4ABC82E3EF4BC0034BB03 /* MedTrack.xcdatamodeld in Sources */,
+				1BB4ABC92E3EF4BC0034BB03 /* MedTrackApp.swift in Sources */,
+				1BB4ABE32E41298F0034BB03 /* AddMedicineView.swift in Sources */,
+				1BB4ABE72E44399E0034BB03 /* NotificationManager.swift in Sources */,
+				1BB4ABCA2E3EF4BC0034BB03 /* Persistence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -575,6 +644,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		1BB4ABC22E3EF4BC0034BB03 /* MedTrack.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				1BB4ABC62E3EF4BC0034BB03 /* MedTrack.xcdatamodel */,
+			);
+			currentVersion = 1BB4ABC62E3EF4BC0034BB03 /* MedTrack.xcdatamodel */;
+			path = MedTrack.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 1BB4AB652E3EF4380034BB03 /* Project object */;
 }

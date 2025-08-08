@@ -10,10 +10,14 @@ import SwiftUI
 @main
 struct MedTrackApp: App {
     let persistenceController = PersistenceController.shared
+    
+    init () {
+        NotificationManager.shared.requestPermisson()
+    }
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
