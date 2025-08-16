@@ -51,7 +51,7 @@ struct HomeView: View {
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
                 ForEach(filteredMedicines) { medicine in
-                    NavigationLink(destination: EditMedicineView(medicine: medicine)) {
+                    NavigationLink(destination: MedicineDetailView(medicine: medicine)) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text(medicine.name ?? "Unnamed")
                                 .font(.headline)
@@ -108,6 +108,7 @@ struct HomeView: View {
         for index in offsets {
             let med = medicines[index]
             viewContext.delete(med)
+            HapticsManager.notify(.warning)
         }
         do {
             try viewContext.save()

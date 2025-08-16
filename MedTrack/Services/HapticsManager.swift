@@ -1,3 +1,11 @@
+//
+//  HapticsManager.swift
+//  MedTrack
+//
+//  Created by Aryan kumar on 8/16/25.
+//
+
+
 import UIKit
 
 enum HapticsManager {

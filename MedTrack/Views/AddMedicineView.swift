@@ -40,6 +40,7 @@ struct AddMedicineView: View {
                             .foregroundColor(.gray)
                     }
                     Button("Select Image") {
+                        HapticsManager.impact(.medium)
                         showImageSourceOptions = true
                     }
                     .confirmationDialog("Choose Image Source", isPresented: $showImageSourceOptions, titleVisibility: .visible) {
@@ -88,6 +89,7 @@ struct AddMedicineView: View {
         do {
             try viewContext.save()
             NotificationManager.shared.scheduleExpiryNotification(for: newMed)
+            HapticsManager.notify(.success)
         } catch {
             print("Save failed: \(error.localizedDescription)")
         }
