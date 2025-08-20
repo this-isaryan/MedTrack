@@ -17,6 +17,7 @@
 		1BB4ABE52E4187190034BB03 /* MedicineDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABE42E4187170034BB03 /* MedicineDetailView.swift */; };
 		1BB4ABE72E44399E0034BB03 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABE62E4439930034BB03 /* NotificationManager.swift */; };
 		1BF4121B2E5111FA00C077DB /* HapticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF4121A2E5111FA00C077DB /* HapticsManager.swift */; };
+		1BF4122C2E54094D00C077DB /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BF4122B2E54094D00C077DB /* ProfileView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,6 +53,7 @@
 		1BB4ABE42E4187170034BB03 /* MedicineDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineDetailView.swift; sourceTree = "<group>"; };
 		1BB4ABE62E4439930034BB03 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		1BF4121A2E5111FA00C077DB /* HapticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticsManager.swift; sourceTree = "<group>"; };
+		1BF4122B2E54094D00C077DB /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -138,6 +140,7 @@
 		1BB4ABDC2E3EF5F10034BB03 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				1BF4122B2E54094D00C077DB /* ProfileView.swift */,
 				1BB4ABE42E4187170034BB03 /* MedicineDetailView.swift */,
 				1BB4ABE22E4129610034BB03 /* AddMedicineView.swift */,
 				1BB4ABBF2E3EF4BC0034BB03 /* HomeView.swift */,
@@ -315,6 +318,7 @@
 			files = (
 				1BF4121B2E5111FA00C077DB /* HapticsManager.swift in Sources */,
 				1BB4ABE52E4187190034BB03 /* MedicineDetailView.swift in Sources */,
+				1BF4122C2E54094D00C077DB /* ProfileView.swift in Sources */,
 				1BB4ABC72E3EF4BC0034BB03 /* HomeView.swift in Sources */,
 				1BB4ABE12E3EFC3F0034BB03 /* MedicineViewModel.swift in Sources */,
 				1BB4ABC82E3EF4BC0034BB03 /* MedTrack.xcdatamodeld in Sources */,

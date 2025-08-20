@@ -89,6 +89,11 @@ struct HomeView: View {
                         Label("Add", systemImage: "plus")
                     }
                 }
+                ToolbarItem(placement: .navigationBarLeading) {
+                        NavigationLink(destination: ProfileView()) {
+                            Image(systemName: "person.crop.circle")
+                        }
+                    }
             }
             .sheet(isPresented: $showAddForm) {
                 AddMedicineView()
