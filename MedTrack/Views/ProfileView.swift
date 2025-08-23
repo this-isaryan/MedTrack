@@ -13,9 +13,9 @@ struct ProfileView: View {
     @AppStorage("profileGender") private var gender: String = "Other"
     @AppStorage("profileEmail") private var email: String = ""
     @AppStorage("profileBloodType") private var bloodType: String = "O+"
-    @AppStorage("profileHeight") private var height: String = ""
+    @AppStorage("profileHeightCM") private var heightCM: Double = 0.0
     @AppStorage("profileHeightUnit") private var heightUnit: String = "cm"
-    @AppStorage("profileWeight") private var weight: String = ""
+    @AppStorage("profileWeightKG") private var weightKG: Double = 0.0
     @AppStorage("profileWeightUnit") private var weightUnit: String = "kg"
     @AppStorage("profileAllergies") private var allergies: String = ""
     @AppStorage("profileConditions") private var conditions: String = ""
@@ -26,9 +26,13 @@ struct ProfileView: View {
     @State private var showImageSourceOptions = false
     @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
     
+    @State private var heightFeet: String = ""
+    @State private var heightInches: String = ""
+    @State private var weightInput: String = ""
+    
     let genderOptions = ["Male", "Female", "Other"]
     let bloodTypeOptions = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
-    let heightUnits = ["cm", "in"]
+    let heightUnits = ["cm", "ft/in"]
     let weightUnits = ["kg", "lb"]
 
     var body: some View {
@@ -82,24 +86,56 @@ struct ProfileView: View {
                     }
                 }
                 
-                HStack {
-                    TextField("Height", text: $height)
-                        .keyboardType(.decimalPad)
-                    Picker("", selection: $heightUnit) {
-                        ForEach(heightUnits, id: \.self) { Text($0) }
+                Section(header: Text("Height")) {
+                    if heightUnit == "cm" {
+                        HStack {
+                            TextField("Height", value: $heightCM, format: .number)
+                                .keyboardType(.decimalPad)
+                            Text("cm")
+                        }
+                    } else {
+                        HStack {
+                            TextField("Feet", text: $heightFeet)
+                                .keyboardType(.numberPad)
+                                .frame(width: 60)
+
+                            Text("ft")
+
+                            TextField("Inches", text: $heightInches)
+                                .keyboardType(.numberPad)
+                                .frame(width: 60)
+
+                            Text("in")
+                        }
+                    }
+
+                    Picker("Unit", selection: $heightUnit) {
+                        ForEach(heightUnits, id: \.self) { unit in
+                            Text(unit)
+                        }
                     }
                     .pickerStyle(.segmented)
-                    .frame(width: 100)
+                    .onChange(of: heightUnit) {
+                        convertHeight(to: heightUnit)
+                    }
                 }
                 
-                HStack {
-                    TextField("Weight", text: $weight)
-                        .keyboardType(.decimalPad)
-                    Picker("", selection: $weightUnit) {
-                        ForEach(weightUnits, id: \.self) { Text($0) }
+                Section(header: Text("Weight")) {
+                    HStack {
+                        TextField("Weight", text: $weightInput)
+                            .keyboardType(.decimalPad)
+
+                        Picker("", selection: $weightUnit) {
+                            ForEach(weightUnits, id: \.self) {
+                                Text($0)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(width: 100)
+                        .onChange(of: weightUnit) {
+                            convertWeight(to: weightUnit)
+                        }
                     }
-                    .pickerStyle(.segmented)
-                    .frame(width: 100)
                 }
                 
                 TextField("Known Alleregies", text: $allergies, axis: .vertical)
@@ -128,6 +164,18 @@ struct ProfileView: View {
             if let imageData = imageData {
                 image = UIImage(data: imageData)
             }
+
+            if heightUnit == "ft/in" {
+                convertHeight(to: "ft/in")
+            }
+
+            // Initialize weight input
+            if weightUnit == "kg" {
+                weightInput = String(format: "%.1f", weightKG)
+            } else {
+                let lb = weightKG * 2.20462
+                weightInput = String(format: "%.1f", lb)
+            }
         }
         .sheet(isPresented: $showImagePicker) {
             ImagePicker(image: $image, sourceType: imageSource)
@@ -150,18 +198,66 @@ struct ProfileView: View {
         if let image = image {
             imageData = image.jpegData(compressionQuality: 0.8)
         }
-    }
 
+        if heightUnit == "cm" {
+            // heightCM already bound
+        } else {
+            let ft = Double(heightFeet) ?? 0
+            let inch = Double(heightInches) ?? 0
+            heightCM = (ft * 30.48) + (inch * 2.54)
+        }
+
+        // Save weight
+        if weightUnit == "kg" {
+            weightKG = Double(weightInput) ?? 0
+        } else {
+            let lb = Double(weightInput) ?? 0
+            weightKG = lb / 2.20462
+        }
+    }
+    
+    private func convertHeight(to unit: String) {
+        if unit == "cm" {
+            // Convert from ft/in to cm
+            let ft = Double(heightFeet) ?? 0
+            let inch = Double(heightInches) ?? 0
+            heightCM = (ft * 30.48) + (inch * 2.54)
+        } else {
+            // Convert from cm to ft/in
+            let totalInches = heightCM / 2.54
+            let ft = Int(totalInches / 12)
+            let inch = totalInches.truncatingRemainder(dividingBy: 12)
+            heightFeet = "\(ft)"
+            heightInches = String(format: "%.0f", inch)
+        }
+    }
+    
+    private func convertWeight(to unit: String) {
+        let value = Double(weightInput) ?? 0
+        if unit == "kg" {
+            // Convert lb to kg
+            weightKG = value / 2.20462
+            weightInput = String(format: "%.1f", weightKG)
+        } else {
+            // Convert kg to lb
+            let lb = weightKG * 2.20462
+            weightInput = String(format: "%.1f", lb)
+        }
+    }
+    
     private func clearProfile() {
         name = ""
         dob = Date()
         gender = "Other"
         email = ""
         bloodType = "O+"
-        height = ""
+        heightCM = 0.0
         heightUnit = "cm"
-        weight = ""
+        heightFeet = ""
+        heightInches = ""
+        weightKG = 0.0
         weightUnit = "kg"
+        weightInput = ""
         allergies = ""
         conditions = ""
         imageData = nil
