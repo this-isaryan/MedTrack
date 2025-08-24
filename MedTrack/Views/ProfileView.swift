@@ -8,14 +8,15 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @Namespace private var profileImageNamespace
     @AppStorage("profileName") private var name: String = ""
     @AppStorage("profileDOB") private var dob: Date = Date()
     @AppStorage("profileGender") private var gender: String = "Other"
     @AppStorage("profileEmail") private var email: String = ""
     @AppStorage("profileBloodType") private var bloodType: String = "O+"
-    @AppStorage("profileHeightCM") private var heightCM: Double = 0.0
+    @AppStorage("profileHeight") private var height: String = ""
     @AppStorage("profileHeightUnit") private var heightUnit: String = "cm"
-    @AppStorage("profileWeightKG") private var weightKG: Double = 0.0
+    @AppStorage("profileWeight") private var weight: String = ""
     @AppStorage("profileWeightUnit") private var weightUnit: String = "kg"
     @AppStorage("profileAllergies") private var allergies: String = ""
     @AppStorage("profileConditions") private var conditions: String = ""
@@ -25,71 +26,113 @@ struct ProfileView: View {
     @State private var showImagePicker = false
     @State private var showImageSourceOptions = false
     @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
-    
+    @State private var isEditing = false
+
     @State private var heightFeet: String = ""
     @State private var heightInches: String = ""
-    @State private var weightInput: String = ""
-    
+
     let genderOptions = ["Male", "Female", "Other"]
-    let bloodTypeOptions = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
+    let bloodTypeOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
     let heightUnits = ["cm", "ft/in"]
     let weightUnits = ["kg", "lb"]
 
     var body: some View {
         Form {
-            Section(header: Text("Profile Picture")) {
-                VStack {
-                    if let image = image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 150, height: 150)
-                            .clipShape(Circle())
+            // Profile Picture
+            Section {
+                Group {
+                    if isEditing {
+                        VStack(spacing: 12) {
+                            if let image = image {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 150, height: 150)
+                                    .clipShape(Circle())
+                                    .matchedGeometryEffect(id: "profilePic", in: profileImageNamespace)
+                            } else {
+                                Image(systemName: "person.circle")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 100, height: 100)
+                                    .foregroundColor(.gray)
+                                    .matchedGeometryEffect(id: "profilePic", in: profileImageNamespace)
+                            }
+
+                            Button("Change Picture") {
+                                showImageSourceOptions = true
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .transition(.opacity)
                     } else {
-                        Image(systemName: "person.circle")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 100, height: 100)
-                            .foregroundColor(.gray)
-                    }
+                        HStack(spacing: 16) {
+                            if let image = image {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 80, height: 80)
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color.gray.opacity(0.3), lineWidth: 1))
+                                    .matchedGeometryEffect(id: "profilePic", in: profileImageNamespace)
+                            } else {
+                                Image(systemName: "person.circle.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 80, height: 80)
+                                    .foregroundColor(.gray)
+                                    .matchedGeometryEffect(id: "profilePic", in: profileImageNamespace)
+                            }
 
-                    Button("Change Picture") {
-                        HapticsManager.impact(.medium)
-                        showImageSourceOptions = true
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(name.isEmpty ? "Your Name" : name.uppercased())
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+
+                                if !email.isEmpty {
+                                    Text(email)
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            Spacer()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .transition(.opacity)
                     }
                 }
-                .frame(maxWidth: .infinity)
             }
 
-//            Basic Info Section
+            // Basic Info
             Section(header: Text("Basic Info")) {
-                TextField("Full Name", text: $name)
-                DatePicker("Date of Birth", selection: $dob, displayedComponents: .date)
-                
-                Picker("Gender", selection: $gender) {
-                    ForEach(genderOptions, id: \.self) {
-                        Text($0)
+                if isEditing {
+                    TextField("Name", text: $name)
+                    DatePicker("Date of Birth", selection: $dob, displayedComponents: .date)
+                    Picker("Gender", selection: $gender) {
+                        ForEach(genderOptions, id: \.self) { Text($0) }
                     }
+                    TextField("Email Address", text: $email)
+                        .keyboardType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .disableAutocorrection(true)
+                } else {
+                    ProfileRow(label: "Date of Birth", value: formattedDate(dob))
+                    ProfileRow(label: "Gender", value: gender)
                 }
-                
-                TextField("Email", text: $email)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .disableAutocorrection(true)
             }
-            
-//            Medical Info Section
+
+
+            // Medical Info
             Section(header: Text("Medical Info")) {
-                Picker("Blood Type", selection: $bloodType) {
-                    ForEach(bloodTypeOptions, id: \.self) {
-                        Text($0)
+                if isEditing {
+                    Picker("Blood Type", selection: $bloodType) {
+                        ForEach(bloodTypeOptions, id: \.self) { Text($0) }
                     }
-                }
-                
-                Section(header: Text("Height")) {
+
                     if heightUnit == "cm" {
                         HStack {
-                            TextField("Height", value: $heightCM, format: .number)
+                            TextField("Height", text: $height)
                                 .keyboardType(.decimalPad)
                             Text("cm")
                         }
@@ -98,37 +141,27 @@ struct ProfileView: View {
                             TextField("Feet", text: $heightFeet)
                                 .keyboardType(.numberPad)
                                 .frame(width: 60)
-
                             Text("ft")
-
                             TextField("Inches", text: $heightInches)
                                 .keyboardType(.numberPad)
                                 .frame(width: 60)
-
                             Text("in")
                         }
                     }
 
                     Picker("Unit", selection: $heightUnit) {
-                        ForEach(heightUnits, id: \.self) { unit in
-                            Text(unit)
-                        }
+                        ForEach(heightUnits, id: \.self) { Text($0) }
                     }
                     .pickerStyle(.segmented)
                     .onChange(of: heightUnit) {
                         convertHeight(to: heightUnit)
                     }
-                }
-                
-                Section(header: Text("Weight")) {
-                    HStack {
-                        TextField("Weight", text: $weightInput)
-                            .keyboardType(.decimalPad)
 
+                    HStack {
+                        TextField("Weight", text: $weight)
+                            .keyboardType(.decimalPad)
                         Picker("", selection: $weightUnit) {
-                            ForEach(weightUnits, id: \.self) {
-                                Text($0)
-                            }
+                            ForEach(weightUnits, id: \.self) { Text($0) }
                         }
                         .pickerStyle(.segmented)
                         .frame(width: 100)
@@ -136,45 +169,58 @@ struct ProfileView: View {
                             convertWeight(to: weightUnit)
                         }
                     }
+
+                    TextField("Known Allergies", text: $allergies, axis: .vertical)
+                        .lineLimit(3...5)
+
+                    TextField("Medical Conditions", text: $conditions, axis: .vertical)
+                        .lineLimit(3...5)
+                } else {
+                    let heightDisplay = heightUnit == "cm" ? "\(height) cm" : "\(heightFeet) ft \(heightInches) in"
+
+
+                    ProfileRow(label: "Blood Type", value: bloodType)
+                    ProfileRow(label: "Height", value: heightDisplay)
+                    ProfileRow(label: "Weight", value: "\(weight) \(weightUnit)")
+                    ProfileRow(label: "Allergies", value: allergies)
+                    ProfileRow(label: "Conditions", value: conditions)
                 }
-                
-                TextField("Known Alleregies", text: $allergies, axis: .vertical)
-                    .lineLimit(3...5)
-                
-                TextField("Medical Conditions", text: $conditions, axis: .vertical)
-                    .lineLimit(3...5)
             }
 
-//            Action Buttons
-            Section {
-                Button("Save Changes") {
-                    saveProfile()
-                    HapticsManager.notify(.success)
-                }
-            }
-
-            Section {
-                Button("Clear Profile", role: .destructive) {
-                    clearProfile()
+            // Save Button
+            if isEditing {
+                Section {
+                    Button("Save Changes") {
+                        saveProfile()
+                        isEditing = false
+                        HapticsManager.notify(.success)
+                    }
                 }
             }
         }
         .navigationTitle("My Profile")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    withAnimation(.easeInOut) {
+                        isEditing.toggle()
+                    }
+                } label: {
+                    Image(systemName: isEditing ? "xmark" : "pencil")
+                }
+            }
+        }
         .onAppear {
             if let imageData = imageData {
                 image = UIImage(data: imageData)
             }
 
-            if heightUnit == "ft/in" {
+            if heightUnit == "ft/in" && (heightFeet.isEmpty || heightInches.isEmpty) {
                 convertHeight(to: "ft/in")
             }
-
-            // Initialize weight input
-            if weightUnit == "kg" {
-                weightInput = String(format: "%.1f", weightKG)
-            } else {
-                let lb = weightKG * 2.20462
-                weightInput = String(format: "%.1f", lb)
+            
+            if weightUnit == "lb" {
+                convertWeight(to: "lb")
             }
         }
         .sheet(isPresented: $showImagePicker) {
@@ -185,7 +231,6 @@ struct ProfileView: View {
                 imageSource = .camera
                 showImagePicker = true
             }
-
             Button("Photo Library") {
                 imageSource = .photoLibrary
                 showImagePicker = true
@@ -194,75 +239,69 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Helper Functions
+
     private func saveProfile() {
         if let image = image {
             imageData = image.jpegData(compressionQuality: 0.8)
         }
-
         if heightUnit == "cm" {
-            // heightCM already bound
+            // already in height
         } else {
             let ft = Double(heightFeet) ?? 0
             let inch = Double(heightInches) ?? 0
-            heightCM = (ft * 30.48) + (inch * 2.54)
-        }
-
-        // Save weight
-        if weightUnit == "kg" {
-            weightKG = Double(weightInput) ?? 0
-        } else {
-            let lb = Double(weightInput) ?? 0
-            weightKG = lb / 2.20462
+            let cm = (ft * 30.48) + (inch * 2.54)
+            height = String(format: "%.1f", cm)
         }
     }
-    
+
     private func convertHeight(to unit: String) {
-        if unit == "cm" {
-            // Convert from ft/in to cm
-            let ft = Double(heightFeet) ?? 0
-            let inch = Double(heightInches) ?? 0
-            heightCM = (ft * 30.48) + (inch * 2.54)
-        } else {
-            // Convert from cm to ft/in
-            let totalInches = heightCM / 2.54
+        guard let cm = Double(height) else {
+            heightFeet = ""
+            heightInches = ""
+            return
+        }
+
+        if unit == "ft/in" {
+            let totalInches = cm / 2.54
             let ft = Int(totalInches / 12)
             let inch = totalInches.truncatingRemainder(dividingBy: 12)
             heightFeet = "\(ft)"
             heightInches = String(format: "%.0f", inch)
         }
     }
-    
+
     private func convertWeight(to unit: String) {
-        let value = Double(weightInput) ?? 0
+        let value = Double(weight) ?? 0
         if unit == "kg" {
-            // Convert lb to kg
-            weightKG = value / 2.20462
-            weightInput = String(format: "%.1f", weightKG)
+            let kg = value / 2.20462
+            weight = String(format: "%.1f", kg)
         } else {
-            // Convert kg to lb
-            let lb = weightKG * 2.20462
-            weightInput = String(format: "%.1f", lb)
+            let lb = value * 2.20462
+            weight = String(format: "%.1f", lb)
         }
     }
-    
-    private func clearProfile() {
-        name = ""
-        dob = Date()
-        gender = "Other"
-        email = ""
-        bloodType = "O+"
-        heightCM = 0.0
-        heightUnit = "cm"
-        heightFeet = ""
-        heightInches = ""
-        weightKG = 0.0
-        weightUnit = "kg"
-        weightInput = ""
-        allergies = ""
-        conditions = ""
-        imageData = nil
-        image = nil
-        HapticsManager.notify(.warning)
+
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - View for Displaying Profile Info Rows
+
+struct ProfileRow: View {
+    var label: String
+    var value: String
+
+    var body: some View {
+        HStack {
+            Text(label)
+            Spacer()
+            Text(value)
+                .foregroundColor(.secondary)
+        }
     }
 }
 
