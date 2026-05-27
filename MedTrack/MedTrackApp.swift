@@ -29,6 +29,9 @@ struct MedTrackApp: App {
                 }
             }
             .environment(\.managedObjectContext, persistenceController.container.viewContext)
+            .onAppear {
+                NotificationManager.shared.requestPermission()
+            }
         }
     }
 }

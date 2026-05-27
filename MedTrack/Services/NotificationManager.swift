@@ -13,7 +13,7 @@ class NotificationManager {
     
     private init() {}
     
-    func requestPermisson() {
+    func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
             if let error = error {
                 print("Permission error: \(error)")
@@ -21,6 +21,10 @@ class NotificationManager {
                 print("Notification permission granted. \(granted)")
             }
         }
+    }
+
+    func requestPermisson() {
+        requestPermission()
     }
     
     func scheduleExpiryNotification(for medicine: Medicine) {

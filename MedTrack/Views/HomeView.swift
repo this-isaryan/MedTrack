@@ -121,8 +121,10 @@ struct HomeView: View {
     }
 
     private func deleteMedicines(offsets: IndexSet) {
-        for index in offsets {
-            let med = medicines[index]
+        let medicinesToDelete = offsets.map { filteredMedicines[$0] }
+
+        for med in medicinesToDelete {
+            NotificationManager.shared.cancelNotification(for: med)
             viewContext.delete(med)
             HapticsManager.notify(.warning)
         }

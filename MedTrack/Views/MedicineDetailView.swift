@@ -187,6 +187,8 @@ struct MedicineDetailView: View {
         
         do {
             try viewContext.save()
+            NotificationManager.shared.cancelNotification(for: medicine)
+            NotificationManager.shared.scheduleExpiryNotification(for: medicine)
         } catch {
             print("Error saving edits: \(error.localizedDescription)")
         }
@@ -216,6 +218,7 @@ struct MedicineDetailView: View {
     }
     
     private func deleteMedicine() {
+        NotificationManager.shared.cancelNotification(for: medicine)
         viewContext.delete(medicine)
         do {
             try viewContext.save()
