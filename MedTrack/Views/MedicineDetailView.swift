@@ -27,7 +27,9 @@ struct MedicineDetailView: View {
     @State private var expiryDate: Date = Date()
     @State private var dosage: String = ""
     @State private var image: UIImage? = nil
+    @State private var pendingImage: UIImage? = nil
     @State private var showImagePicker = false
+    @State private var showImageConfirmation = false
     @State private var showImageSourceOptions = false
     @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
     
@@ -65,21 +67,12 @@ struct MedicineDetailView: View {
             }
             
             Section(header: Text("Medicine Image")) {
-                if let image = image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 150)
-                } else {
-                    Text("No image available")
-                        .foregroundColor(.gray)
-                }
-                
-                if isEditing {
-                    Button("Change Image") {
+                MedicineImageCard(
+                    image: image,
+                    isEditing: isEditing,
+                    actionTitle: image == nil ? "Add Image" : "Change Image"
+                ) {
                         showImageSourceOptions = true
-                    }
-                    .transition(.opacity)
                 }
             }
             
@@ -122,7 +115,10 @@ struct MedicineDetailView: View {
                             expiryDate = originalExpiryDate
                             if let imageData = originalImageData {
                                 image = UIImage(data: imageData)
+                            } else {
+                                image = nil
                             }
+                            pendingImage = nil
                             isEditing = false
                         }
                     }
@@ -137,7 +133,24 @@ struct MedicineDetailView: View {
             }
         }
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(image: $image, sourceType: imageSource)
+            ImagePicker(image: $pendingImage, sourceType: imageSource)
+        }
+        .onChange(of: showImagePicker) {
+            guard !showImagePicker, pendingImage != nil else { return }
+            showImageConfirmation = true
+        }
+        .sheet(isPresented: $showImageConfirmation) {
+            if let pendingImage {
+                MedicineImageConfirmationView(image: pendingImage) {
+                    self.pendingImage = nil
+                    showImageConfirmation = false
+                } onAdd: {
+                    image = pendingImage
+                    self.pendingImage = nil
+                    showImageConfirmation = false
+                    HapticsManager.notify(.success)
+                }
+            }
         }
         .confirmationDialog("Choose Image Source", isPresented: $showImageSourceOptions, titleVisibility: .visible) {
             Button("Camera") {

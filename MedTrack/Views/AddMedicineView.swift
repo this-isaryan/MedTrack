@@ -16,7 +16,9 @@ struct AddMedicineView: View {
     @State private var expiryDate: Date = Date()
     @State private var dosage: String = ""
     @State private var image: UIImage? = nil
+    @State private var pendingImage: UIImage? = nil
     @State private var showImagePicker = false
+    @State private var showImageConfirmation = false
     @State private var showImageSourceOptions = false
     @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
     
@@ -31,15 +33,11 @@ struct AddMedicineView: View {
                 }
                 
                 Section(header: Text("Medicine Photo")) {
-                    if let image = image {
-                        Image(uiImage: image)
-                            .resizable()
-                            .scaledToFit()
-                    } else {
-                        Text("No Image Selected")
-                            .foregroundColor(.gray)
-                    }
-                    Button("Select Image") {
+                    MedicineImageCard(
+                        image: image,
+                        isEditing: true,
+                        actionTitle: image == nil ? "Add Image" : "Change Image"
+                    ) {
                         HapticsManager.impact(.medium)
                         showImageSourceOptions = true
                     }
@@ -66,7 +64,24 @@ struct AddMedicineView: View {
             .navigationTitle("Add Medicine")
                 .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $showImagePicker) {
-                    ImagePicker(image: $image, sourceType: imageSource)
+                    ImagePicker(image: $pendingImage, sourceType: imageSource)
+            }
+            .onChange(of: showImagePicker) {
+                guard !showImagePicker, pendingImage != nil else { return }
+                showImageConfirmation = true
+            }
+            .sheet(isPresented: $showImageConfirmation) {
+                if let pendingImage {
+                    MedicineImageConfirmationView(image: pendingImage) {
+                        self.pendingImage = nil
+                        showImageConfirmation = false
+                    } onAdd: {
+                        image = pendingImage
+                        self.pendingImage = nil
+                        showImageConfirmation = false
+                        HapticsManager.notify(.success)
+                    }
+                }
             }
 
         }
@@ -92,6 +107,94 @@ struct AddMedicineView: View {
             HapticsManager.notify(.success)
         } catch {
             print("Save failed: \(error.localizedDescription)")
+        }
+    }
+}
+
+struct MedicineImageCard: View {
+    let image: UIImage?
+    let isEditing: Bool
+    let actionTitle: String
+    let onImageAction: () -> Void
+
+    var body: some View {
+        VStack(spacing: 14) {
+            ZStack {
+                if let image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    VStack(spacing: 10) {
+                        Image(systemName: "photo")
+                            .font(.system(size: 36, weight: .regular))
+                            .foregroundColor(.secondary)
+
+                        Text("No medicine image added")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                    .background(Color.secondary.opacity(0.08))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(16 / 10, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(.secondarySystemGroupedBackground))
+            )
+            .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 4)
+
+            if isEditing {
+                Button(action: onImageAction) {
+                    Label(actionTitle, systemImage: image == nil ? "photo.badge.plus" : "photo")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.vertical, 6)
+    }
+}
+
+struct MedicineImageConfirmationView: View {
+    let image: UIImage
+    let onCancel: () -> Void
+    let onAdd: () -> Void
+
+    var body: some View {
+        NavigationView {
+            GeometryReader { geometry in
+                VStack(spacing: 20) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: .infinity)
+                        .frame(maxHeight: max(geometry.size.height * 0.65, 260))
+                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 6)
+
+                    Spacer()
+                }
+                .padding(20)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemGroupedBackground))
+                .navigationTitle("Preview Image")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel", action: onCancel)
+                    }
+
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Add", action: onAdd)
+                    }
+                }
+            }
         }
     }
 }
