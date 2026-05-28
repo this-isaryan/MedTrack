@@ -22,6 +22,13 @@ struct MedTrackApp: App {
                 }
 
                 NavigationView {
+                    MedicineCategoriesView()
+                }
+                .tabItem {
+                    Label("Categories", systemImage: "rectangle.3.group")
+                }
+
+                NavigationView {
                     ProfileView()
                 }
                 .tabItem {
