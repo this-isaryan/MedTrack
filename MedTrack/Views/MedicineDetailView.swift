@@ -13,6 +13,7 @@ struct MedicineDetailView: View {
     @Environment(\.dismiss) private var dismiss
     
     @ObservedObject var medicine: Medicine
+    let notificationAction: ExpiryReminderRoute.Action?
     
     @State private var showDeleteConfirmation = false
     
@@ -32,8 +33,20 @@ struct MedicineDetailView: View {
     @State private var showImageConfirmation = false
     @State private var showImageSourceOptions = false
     @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
+    @State private var showSnoozeOptions = false
+    @State private var showCustomSnoozeSheet = false
+    @State private var customSnoozeDate = Date()
+    @State private var showRestockSheet = false
+    @State private var restockExpiryDate = Date()
+    @State private var confirmationMessage: String?
+    @State private var didHandleNotificationAction = false
     
     @State private var isEditing = false
+
+    init(medicine: Medicine, notificationAction: ExpiryReminderRoute.Action? = nil) {
+        self.medicine = medicine
+        self.notificationAction = notificationAction
+    }
     
     var body: some View {
         Form {
@@ -73,6 +86,33 @@ struct MedicineDetailView: View {
                     actionTitle: image == nil ? "Add Image" : "Change Image"
                 ) {
                         showImageSourceOptions = true
+                }
+            }
+
+            if shouldShowExpiryActions {
+                Section(header: Text("Expiry Reminder")) {
+                    if let snoozedUntil = reminderDateValue(forKey: "expiryReminderSnoozedUntil"), snoozedUntil > Date() {
+                        HStack {
+                            Label("Snoozed until", systemImage: "bell.slash")
+                            Spacer()
+                            Text(formattedDate(snoozedUntil))
+                                .foregroundColor(.secondary)
+                        }
+                    }
+
+                    Button {
+                        customSnoozeDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+                        showSnoozeOptions = true
+                    } label: {
+                        Label("Snooze Reminder", systemImage: "clock")
+                    }
+
+                    Button {
+                        restockExpiryDate = Calendar.current.date(byAdding: .month, value: 6, to: Date()) ?? Date()
+                        showRestockSheet = true
+                    } label: {
+                        Label("Mark as Restocked", systemImage: "arrow.clockwise.circle")
+                    }
                 }
             }
             
@@ -163,6 +203,45 @@ struct MedicineDetailView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        .confirmationDialog("Snooze Reminder", isPresented: $showSnoozeOptions, titleVisibility: .visible) {
+            Button("Remind Tomorrow") {
+                snoozeReminder(until: Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date())
+            }
+            Button("Remind in 3 Days") {
+                snoozeReminder(until: Calendar.current.date(byAdding: .day, value: 3, to: Date()) ?? Date())
+            }
+            Button("Remind on Expiry Date") {
+                snoozeReminder(until: medicine.expiryDate ?? Date())
+            }
+            Button("Custom Date") {
+                showCustomSnoozeSheet = true
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .sheet(isPresented: $showCustomSnoozeSheet) {
+            CustomSnoozeDateView(snoozeDate: $customSnoozeDate) {
+                showCustomSnoozeSheet = false
+            } onSave: {
+                snoozeReminder(until: customSnoozeDate)
+                showCustomSnoozeSheet = false
+            }
+        }
+        .sheet(isPresented: $showRestockSheet) {
+            RestockMedicineView(expiryDate: $restockExpiryDate) {
+                showRestockSheet = false
+            } onSave: {
+                markAsRestocked(newExpiryDate: restockExpiryDate)
+                showRestockSheet = false
+            }
+        }
+        .alert("Reminder Updated", isPresented: Binding(
+            get: { confirmationMessage != nil },
+            set: { if !$0 { confirmationMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(confirmationMessage ?? "")
+        }
         .alert("Are you sure?", isPresented: $showDeleteConfirmation) {
             Button("Delete", role: .destructive) {
                 deleteMedicine()
@@ -185,10 +264,13 @@ struct MedicineDetailView: View {
             if let imageData = medicine.image {
                 image = UIImage(data: imageData)
             }
+            handleNotificationActionIfNeeded()
         }
     }
     
     private func updateMedicine() {
+        let didChangeExpiryDate = medicine.expiryDate != expiryDate
+
         medicine.name = name
         medicine.purpose = purpose
         medicine.dosage = dosage
@@ -196,6 +278,10 @@ struct MedicineDetailView: View {
         
         if let image = image {
             medicine.image = image.jpegData(compressionQuality: 0.8)
+        }
+        if didChangeExpiryDate {
+            setReminderDateValue(nil, forKey: "expiryReminderSnoozedUntil")
+            setReminderDateValue(nil, forKey: "expiryReminderSentAt")
         }
         
         do {
@@ -212,6 +298,85 @@ struct MedicineDetailView: View {
             let formatter = DateFormatter()
             formatter.dateStyle = .medium
             return formatter.string(from: date)
+    }
+
+    private var shouldShowExpiryActions: Bool {
+        guard let expiryDate = medicine.expiryDate else { return false }
+        return isExpiringSoon(expiryDate) || isExpired(expiryDate)
+    }
+
+    private func isExpiringSoon(_ date: Date) -> Bool {
+        let daysLeft = Calendar.current.dateComponents([.day], from: Date(), to: date).day ?? 0
+        return daysLeft >= 0 && daysLeft <= 7
+    }
+
+    private func isExpired(_ date: Date) -> Bool {
+        date < Date()
+    }
+
+    private func snoozeReminder(until date: Date) {
+        setReminderDateValue(date, forKey: "expiryReminderSnoozedUntil")
+        setReminderDateValue(nil, forKey: "expiryReminderSentAt")
+
+        do {
+            try viewContext.save()
+            NotificationManager.shared.scheduleExpiryNotification(for: medicine)
+            confirmationMessage = "Expiry reminder snoozed until \(formattedDate(date))."
+            HapticsManager.notify(.success)
+        } catch {
+            print("Error snoozing reminder: \(error.localizedDescription)")
+        }
+    }
+
+    private func markAsRestocked(newExpiryDate: Date) {
+        medicine.expiryDate = newExpiryDate
+        setReminderDateValue(nil, forKey: "expiryReminderSnoozedUntil")
+        setReminderDateValue(nil, forKey: "expiryReminderSentAt")
+        setReminderDateValue(Date(), forKey: "lastRestockedAt")
+
+        expiryDate = newExpiryDate
+
+        do {
+            try viewContext.save()
+            NotificationManager.shared.scheduleExpiryNotification(for: medicine)
+            saveOriginalValues()
+            confirmationMessage = "Medicine marked as restocked. A new expiry reminder has been scheduled."
+            HapticsManager.notify(.success)
+        } catch {
+            print("Error marking as restocked: \(error.localizedDescription)")
+        }
+    }
+
+    private func reminderDateValue(forKey key: String) -> Date? {
+        medicine.value(forKey: key) as? Date
+    }
+
+    private func setReminderDateValue(_ date: Date?, forKey key: String) {
+        medicine.setValue(date, forKey: key)
+    }
+
+    private func handleNotificationActionIfNeeded() {
+        guard !didHandleNotificationAction else { return }
+        didHandleNotificationAction = true
+
+        switch notificationAction {
+        case .snooze:
+            print("Opening Snooze Reminder flow from notification for medicine \(medicine.id?.uuidString ?? "unknown")")
+            customSnoozeDate = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+            DispatchQueue.main.async {
+                showSnoozeOptions = true
+            }
+        case .restock:
+            print("Opening Mark as Restocked flow from notification for medicine \(medicine.id?.uuidString ?? "unknown")")
+            restockExpiryDate = Calendar.current.date(byAdding: .month, value: 6, to: Date()) ?? Date()
+            DispatchQueue.main.async {
+                showRestockSheet = true
+            }
+        case .openDetails:
+            print("Opening medicine details from notification for medicine \(medicine.id?.uuidString ?? "unknown")")
+        case .none:
+            break
+        }
     }
     
     private var hasChanges: Bool {
@@ -238,6 +403,60 @@ struct MedicineDetailView: View {
             dismiss()
         } catch {
             print("Error deleting medicine: \(error.localizedDescription)")
+        }
+    }
+}
+
+private struct CustomSnoozeDateView: View {
+    @Binding var snoozeDate: Date
+    let onCancel: () -> Void
+    let onSave: () -> Void
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    DatePicker("Remind Me On", selection: $snoozeDate, in: Date()..., displayedComponents: .date)
+                }
+            }
+            .navigationTitle("Custom Snooze")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save", action: onSave)
+                }
+            }
+        }
+    }
+}
+
+private struct RestockMedicineView: View {
+    @Binding var expiryDate: Date
+    let onCancel: () -> Void
+    let onSave: () -> Void
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Restock Details")) {
+                    DatePicker("New Expiry Date", selection: $expiryDate, in: Date()..., displayedComponents: .date)
+                }
+            }
+            .navigationTitle("Mark as Restocked")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", action: onCancel)
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save", action: onSave)
+                }
+            }
         }
     }
 }

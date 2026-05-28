@@ -4,9 +4,12 @@
         <attribute name="addedDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="dosage" optional="YES" attributeType="String"/>
         <attribute name="expiryDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="expiryReminderSentAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="expiryReminderSnoozedUntil" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="image" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="isArchived" optional="YES" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="lastRestockedAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
         <attribute name="purpose" optional="YES" attributeType="String"/>
         <uniquenessConstraints>
