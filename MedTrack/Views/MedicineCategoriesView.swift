@@ -73,7 +73,7 @@ struct MedicineCategoriesView: View {
             Text("No medicines yet")
                 .font(.headline)
 
-            Text("Medicines will appear here grouped by purpose once you add them.")
+            Text("Medicines will appear here grouped by what they are used for once you add them.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

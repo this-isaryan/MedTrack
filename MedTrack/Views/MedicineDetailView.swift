@@ -43,7 +43,7 @@ struct MedicineDetailView: View {
                     .opacity(isEditing ? 1 : 0.6)
                     .animation(.easeOut, value: isEditing)
                 
-                TextField("Purpose", text: $purpose)
+                TextField("Used For", text: $purpose)
                     .disabled(!isEditing)
                     .opacity(isEditing ? 1 : 0.6)
                     .animation(.easeOut, value: isEditing)

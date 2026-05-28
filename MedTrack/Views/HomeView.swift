@@ -49,6 +49,28 @@ struct HomeView: View {
 
     var body: some View {
         List {
+            if searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                NavigationLink(destination: MedicineCategoriesView()) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "rectangle.3.group.fill")
+                            .font(.title2)
+                            .foregroundColor(.accentColor)
+                            .frame(width: 42, height: 42)
+                            .background(Color.accentColor.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Categories")
+                                .font(.headline)
+                            Text("Browse medicines by use")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 6)
+                }
+            }
+
             // Filter Picker
             Picker("Filter", selection: $selectedFilter) {
                 ForEach(FilterOption.allCases) { option in
@@ -64,7 +86,7 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 5) {
                         Text(medicine.name ?? "Unnamed")
                             .font(.headline)
-                        Text("For: \(medicine.purpose ?? "Unknown")")
+                        Text("Used For: \(medicine.purpose ?? "Unknown")")
                             .font(.subheadline)
                         Text("Expires: \(formattedDate(medicine.expiryDate))")
                             .font(.caption)
@@ -86,7 +108,7 @@ struct HomeView: View {
             .onDelete(perform: deleteMedicines)
         }
         .navigationTitle("My Medicines")
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search by name or purpose")
+        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search by name or used for")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {

@@ -27,7 +27,7 @@ struct AddMedicineView: View {
             Form {
                 Section(header: Text("Medicine Info")) {
                     TextField("Medicine Name", text: $name)
-                    TextField("Purpose", text: $purpose)
+                    TextField("Used For", text: $purpose)
                     TextField("Dosage (e.g. 1 pill twice a day)", text: $dosage)
                     DatePicker("Expiry Date", selection: $expiryDate, displayedComponents: .date)
                 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B9F3F062FC775C7004E0ED6 /* MedicineCategoriesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B9F3F052FC775C7004E0ED6 /* MedicineCategoriesView.swift */; };
 		1BB4ABC72E3EF4BC0034BB03 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABBF2E3EF4BC0034BB03 /* HomeView.swift */; };
 		1BB4ABC82E3EF4BC0034BB03 /* MedTrack.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABC22E3EF4BC0034BB03 /* MedTrack.xcdatamodeld */; };
 		1BB4ABC92E3EF4BC0034BB03 /* MedTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB4ABC32E3EF4BC0034BB03 /* MedTrackApp.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1B9F3F052FC775C7004E0ED6 /* MedicineCategoriesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedicineCategoriesView.swift; sourceTree = "<group>"; };
 		1BB4AB6D2E3EF4380034BB03 /* MedTrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MedTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BB4AB812E3EF43A0034BB03 /* MedTrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedTrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BB4AB8B2E3EF43A0034BB03 /* MedTrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MedTrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -144,6 +146,7 @@
 				1BB4ABE42E4187170034BB03 /* MedicineDetailView.swift */,
 				1BB4ABE22E4129610034BB03 /* AddMedicineView.swift */,
 				1BB4ABBF2E3EF4BC0034BB03 /* HomeView.swift */,
+				1B9F3F052FC775C7004E0ED6 /* MedicineCategoriesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -323,6 +326,7 @@
 				1BB4ABE12E3EFC3F0034BB03 /* MedicineViewModel.swift in Sources */,
 				1BB4ABC82E3EF4BC0034BB03 /* MedTrack.xcdatamodeld in Sources */,
 				1BB4ABC92E3EF4BC0034BB03 /* MedTrackApp.swift in Sources */,
+				1B9F3F062FC775C7004E0ED6 /* MedicineCategoriesView.swift in Sources */,
 				1BB4ABE32E41298F0034BB03 /* AddMedicineView.swift in Sources */,
 				1BB4ABE72E44399E0034BB03 /* NotificationManager.swift in Sources */,
 				1BB4ABCA2E3EF4BC0034BB03 /* Persistence.swift in Sources */,
