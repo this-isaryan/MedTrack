@@ -22,11 +22,21 @@ struct MedicineDetailView: View {
     @State private var originalDosage: String = ""
     @State private var originalExpiryDate: Date = Date()
     @State private var originalImageData: Data? = nil
+    @State private var originalMedicineForm: String = ""
+    @State private var originalStrengthValue: String = ""
+    @State private var originalStrengthUnit: String = ""
+    @State private var originalQuantity: String = ""
+    @State private var originalQuantityUnit: String = ""
     
     @State private var name: String = ""
     @State private var purpose: String = ""
     @State private var expiryDate: Date = Date()
     @State private var dosage: String = ""
+    @State private var medicineForm: String = ""
+    @State private var strengthValue: String = ""
+    @State private var strengthUnit: String = ""
+    @State private var quantity: String = ""
+    @State private var quantityUnit: String = ""
     @State private var image: UIImage? = nil
     @State private var pendingImage: UIImage? = nil
     @State private var showImagePicker = false
@@ -60,6 +70,31 @@ struct MedicineDetailView: View {
                     .disabled(!isEditing)
                     .opacity(isEditing ? 1 : 0.6)
                     .animation(.easeOut, value: isEditing)
+
+                TextField("Form", text: $medicineForm)
+                    .disabled(!isEditing)
+                    .opacity(isEditing ? 1 : 0.6)
+                    .animation(.easeOut, value: isEditing)
+
+                HStack {
+                    TextField("Strength", text: $strengthValue)
+                        .keyboardType(.decimalPad)
+                    TextField("Unit", text: $strengthUnit)
+                        .frame(width: 80)
+                }
+                .disabled(!isEditing)
+                .opacity(isEditing ? 1 : 0.6)
+                .animation(.easeOut, value: isEditing)
+
+                HStack {
+                    TextField("Quantity", text: $quantity)
+                        .keyboardType(.numberPad)
+                    TextField("Unit", text: $quantityUnit)
+                        .frame(width: 110)
+                }
+                .disabled(!isEditing)
+                .opacity(isEditing ? 1 : 0.6)
+                .animation(.easeOut, value: isEditing)
                 
                 TextField("Dosage", text: $dosage)
                     .disabled(!isEditing)
@@ -152,6 +187,11 @@ struct MedicineDetailView: View {
                             name = originalName
                             purpose = originalPurpose
                             dosage = originalDosage
+                            medicineForm = originalMedicineForm
+                            strengthValue = originalStrengthValue
+                            strengthUnit = originalStrengthUnit
+                            quantity = originalQuantity
+                            quantityUnit = originalQuantityUnit
                             expiryDate = originalExpiryDate
                             if let imageData = originalImageData {
                                 image = UIImage(data: imageData)
@@ -256,10 +296,20 @@ struct MedicineDetailView: View {
             originalDosage = medicine.dosage ?? ""
             originalExpiryDate = medicine.expiryDate ?? Date()
             originalImageData = medicine.image
+            originalMedicineForm = medicineStringValue(forKey: "medicineForm")
+            originalStrengthValue = medicineStringValue(forKey: "strengthValue")
+            originalStrengthUnit = medicineStringValue(forKey: "strengthUnit")
+            originalQuantity = medicineQuantityString()
+            originalQuantityUnit = medicineStringValue(forKey: "quantityUnit")
             
             name = medicine.name ?? ""
             purpose = medicine.purpose ?? ""
             dosage = medicine.dosage ?? ""
+            medicineForm = originalMedicineForm
+            strengthValue = originalStrengthValue
+            strengthUnit = originalStrengthUnit
+            quantity = originalQuantity
+            quantityUnit = originalQuantityUnit
             expiryDate = medicine.expiryDate ?? Date()
             if let imageData = medicine.image {
                 image = UIImage(data: imageData)
@@ -275,6 +325,11 @@ struct MedicineDetailView: View {
         medicine.purpose = purpose
         medicine.dosage = dosage
         medicine.expiryDate = expiryDate
+        medicine.setValue(medicineForm, forKey: "medicineForm")
+        medicine.setValue(strengthValue, forKey: "strengthValue")
+        medicine.setValue(strengthUnit, forKey: "strengthUnit")
+        medicine.setValue(Int16(quantity.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0, forKey: "quantity")
+        medicine.setValue(quantityUnit, forKey: "quantityUnit")
         
         if let image = image {
             medicine.image = image.jpegData(compressionQuality: 0.8)
@@ -355,6 +410,15 @@ struct MedicineDetailView: View {
         medicine.setValue(date, forKey: key)
     }
 
+    private func medicineStringValue(forKey key: String) -> String {
+        medicine.value(forKey: key) as? String ?? ""
+    }
+
+    private func medicineQuantityString() -> String {
+        let value = medicine.value(forKey: "quantity") as? Int16 ?? 0
+        return value == 0 ? "" : "\(value)"
+    }
+
     private func handleNotificationActionIfNeeded() {
         guard !didHandleNotificationAction else { return }
         didHandleNotificationAction = true
@@ -383,6 +447,11 @@ struct MedicineDetailView: View {
         name != originalName ||
         purpose != originalPurpose ||
         dosage != originalDosage ||
+        medicineForm != originalMedicineForm ||
+        strengthValue != originalStrengthValue ||
+        strengthUnit != originalStrengthUnit ||
+        quantity != originalQuantity ||
+        quantityUnit != originalQuantityUnit ||
         expiryDate != originalExpiryDate ||
         image?.jpegData(compressionQuality: 0.8) != originalImageData
     }
@@ -393,6 +462,11 @@ struct MedicineDetailView: View {
         originalDosage = dosage
         originalExpiryDate = expiryDate
         originalImageData = image?.jpegData(compressionQuality: 0.8)
+        originalMedicineForm = medicineForm
+        originalStrengthValue = strengthValue
+        originalStrengthUnit = strengthUnit
+        originalQuantity = quantity
+        originalQuantityUnit = quantityUnit
     }
     
     private func deleteMedicine() {

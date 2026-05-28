@@ -112,10 +112,9 @@ class NotificationManager: NSObject, UNUserNotificationCenterDelegate {
         content.sound = .default
         content.categoryIdentifier = "EXPIRY_REMINDER"
         
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: 10,
-            repeats: false
-        )
+        let triggerDate = nextExpiryReminderDate(for: medicine, expiryDate: expiryDate)
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate), repeats: false)
         
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
         
