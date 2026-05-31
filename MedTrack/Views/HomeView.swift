@@ -49,47 +49,20 @@ struct HomeView: View {
         return baseList
     }
 
+    private var isSearching: Bool {
+        !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
-        List {
-            // Filter Picker
-            Picker("Filter", selection: $selectedFilter) {
-                ForEach(FilterOption.allCases) { option in
-                    Text(option.rawValue).tag(option)
-                }
+        Group {
+            if medicines.isEmpty {
+                emptyStateView
+            } else {
+                medicineList
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-
-            // Medicines List
-            ForEach(filteredMedicines) { medicine in
-                NavigationLink(destination: MedicineDetailView(medicine: medicine)) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text(medicine.name ?? "Unnamed")
-                            .font(.headline)
-                        Text("Used For: \(medicine.purpose ?? "Unknown")")
-                            .font(.subheadline)
-                        Text("Expires: \(formattedDate(medicine.expiryDate))")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-
-                        if isExpiringSoon(medicine.expiryDate) {
-                            Text("⚠️ Expiring Soon")
-                                .font(.caption2)
-                                .foregroundColor(.red)
-                        } else if isExpired(medicine.expiryDate) {
-                            Text("🚫 Expired")
-                                .font(.caption2)
-                                .foregroundColor(.red)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-            }
-            .onDelete(perform: deleteMedicines)
-
-            notificationNavigationLink
         }
         .navigationTitle("My Medicines")
+        .background(Color(.systemGroupedBackground).ignoresSafeArea())
         .onAppear {
             if let route = notificationRouter.route {
                 selectedNotificationRoute = route
@@ -113,6 +86,110 @@ struct HomeView: View {
             AddMedicineView()
                 .environment(\.managedObjectContext, viewContext)
         }
+    }
+
+    private var medicineList: some View {
+        List {
+            // Filter Picker
+            Picker("Filter", selection: $selectedFilter) {
+                ForEach(FilterOption.allCases) { option in
+                    Text(option.rawValue).tag(option)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+
+            // Medicines List
+            if filteredMedicines.isEmpty {
+                noResultsView
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+            } else {
+                ForEach(filteredMedicines) { medicine in
+                    NavigationLink(destination: MedicineDetailView(medicine: medicine)) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text(medicine.name ?? "Unnamed")
+                                .font(.headline)
+                            Text("Used For: \(medicine.purpose ?? "Unknown")")
+                                .font(.subheadline)
+                            Text("Expires: \(formattedDate(medicine.expiryDate))")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+
+                            if isExpiringSoon(medicine.expiryDate) {
+                                Text("⚠️ Expiring Soon")
+                                    .font(.caption2)
+                                    .foregroundColor(.red)
+                            } else if isExpired(medicine.expiryDate) {
+                                Text("🚫 Expired")
+                                    .font(.caption2)
+                                    .foregroundColor(.red)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                .onDelete(perform: deleteMedicines)
+            }
+
+            notificationNavigationLink
+        }
+    }
+
+    private var emptyStateView: some View {
+        ScrollView {
+            VStack(spacing: 14) {
+                Image(systemName: "pills")
+                    .font(.system(size: 42, weight: .regular))
+                    .foregroundColor(.secondary)
+
+                Text("No medicines yet")
+                    .font(.headline)
+
+                Text("Add your first medicine to start tracking expiry dates and reminders.")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 28)
+
+                Button {
+                    showAddForm = true
+                } label: {
+                    Text("Add a medicine to get started")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .padding(.top, 4)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 120)
+
+            notificationNavigationLink
+                .hidden()
+        }
+    }
+
+    private var noResultsView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 34, weight: .semibold))
+                .foregroundColor(.secondary)
+
+            Text(isSearching ? "No matching medicines found" : "No medicines in this filter")
+                .font(.headline)
+                .foregroundColor(.primary)
+
+            Text(isSearching ? "Try a different medicine name or used for value." : "Try switching back to All medicines.")
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 56)
+        .padding(.bottom, 80)
     }
 
     private var notificationNavigationLink: some View {
