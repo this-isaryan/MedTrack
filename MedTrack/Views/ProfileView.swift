@@ -140,12 +140,15 @@ struct ProfileView: View {
                         }
                     } else {
                         HStack {
+                            Spacer()
                             TextField("Feet", text: $heightFeet)
                                 .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
                                 .frame(width: 60)
                             Text("ft")
                             TextField("Inches", text: $heightInches)
                                 .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
                                 .frame(width: 60)
                             Text("in")
                         }

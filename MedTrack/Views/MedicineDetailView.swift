@@ -79,7 +79,9 @@ struct MedicineDetailView: View {
                 HStack {
                     TextField("Strength", text: $strengthValue)
                         .keyboardType(.decimalPad)
+                    Spacer(minLength: 16)
                     TextField("Unit", text: $strengthUnit)
+                        .multilineTextAlignment(.trailing)
                         .frame(width: 80)
                 }
                 .disabled(!isEditing)
@@ -89,7 +91,9 @@ struct MedicineDetailView: View {
                 HStack {
                     TextField("Quantity", text: $quantity)
                         .keyboardType(.numberPad)
+                    Spacer(minLength: 16)
                     TextField("Unit", text: $quantityUnit)
+                        .multilineTextAlignment(.trailing)
                         .frame(width: 110)
                 }
                 .disabled(!isEditing)
