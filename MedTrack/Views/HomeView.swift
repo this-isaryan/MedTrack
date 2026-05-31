@@ -73,6 +73,14 @@ struct HomeView: View {
             guard let route else { return }
             selectedNotificationRoute = route
         }
+        .onChange(of: selectedNotificationRoute) { _, route in
+            if route == nil {
+                notificationRouter.route = nil
+            }
+        }
+        .navigationDestination(item: $selectedNotificationRoute) { route in
+            notificationDestination(for: route)
+        }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search by name or used for")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -125,9 +133,6 @@ struct HomeView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
             .padding(.bottom, 104)
-
-            notificationNavigationLink
-                .hidden()
         }
     }
 
@@ -159,9 +164,6 @@ struct HomeView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.top, 120)
-
-            notificationNavigationLink
-                .hidden()
         }
     }
 
@@ -186,36 +188,15 @@ struct HomeView: View {
         .padding(.bottom, 80)
     }
 
-    private var notificationNavigationLink: some View {
-        NavigationLink(
-            destination: notificationDestination,
-            isActive: Binding(
-                get: { selectedNotificationRoute != nil },
-                set: { isActive in
-                    if !isActive {
-                        selectedNotificationRoute = nil
-                        notificationRouter.route = nil
-                    }
-                }
-            )
-        ) {
-            EmptyView()
-        }
-        .hidden()
-    }
-
     @ViewBuilder
-    private var notificationDestination: some View {
-        if let route = selectedNotificationRoute,
-           let medicine = medicines.first(where: { $0.id == route.medicineID }) {
+    private func notificationDestination(for route: ExpiryReminderRoute) -> some View {
+        if let medicine = medicines.first(where: { $0.id == route.medicineID }) {
             MedicineDetailView(medicine: medicine, notificationAction: route.action)
         } else {
             Text("Medicine not found")
                 .navigationTitle("Medicine Details")
                 .onAppear {
-                    if let route = selectedNotificationRoute {
-                        print("Notification route medicine not found: \(route.medicineID)")
-                    }
+                    print("Notification route medicine not found: \(route.medicineID)")
                 }
         }
     }

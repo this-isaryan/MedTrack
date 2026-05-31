@@ -9,8 +9,8 @@ import Foundation
 import UserNotifications
 import Combine
 
-struct ExpiryReminderRoute: Identifiable, Equatable {
-    enum Action: Equatable {
+struct ExpiryReminderRoute: Identifiable, Equatable, Hashable {
+    enum Action: Equatable, Hashable {
         case openDetails
         case snooze
         case restock

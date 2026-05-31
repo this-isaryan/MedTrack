@@ -16,8 +16,10 @@ struct AddMedicineView: View {
     @State private var medicineForm: String = ""
     @State private var strengthValue: String = ""
     @State private var strengthUnit: String = "mg"
-    @State private var quantity: String = ""
+    @State private var quantity: String = "10"
     @State private var quantityUnit: String = "tablets"
+    @State private var isEditingQuantityManually = false
+    @State private var manualQuantityText = ""
     @State private var purpose: String = ""
     @State private var expiryDate: Date = Date()
     @State private var dosage: String = ""
@@ -27,10 +29,11 @@ struct AddMedicineView: View {
     @State private var showImageConfirmation = false
     @State private var showImageSourceOptions = false
     @State private var imageSource: UIImagePickerController.SourceType = .photoLibrary
+    @FocusState private var isManualQuantityFocused: Bool
 
     private let medicineForms = ["Capsule", "Tablet", "Liquid", "Topical", "Cream", "Device", "Drops", "Injection", "Other"]
     private let strengthUnits = ["mg", "mcg", "g", "mL", "%", "IU", "Other"]
-    private let quantityUnits = ["tablets", "capsules", "pills", "bottles", "tubes", "packs", "doses", "other"]
+    private let quantityUnits = ["tablets", "capsules", "pills", "bottles", "tubes", "packs", "doses", "units", "other"]
     private let usedForExamples = ["Fever", "Headache", "Allergy", "Pain Relief", "Cold & Flu"]
     
     var body: some View {
@@ -146,7 +149,10 @@ struct AddMedicineView: View {
                 roundedTextField("Add Medication Name", text: $name)
             }
         case .form:
-            selectionStep(title: "Choose the Medication Type", sections: [("Common Forms", Array(medicineForms.prefix(4))), ("More Forms", Array(medicineForms.dropFirst(4)))], selection: $medicineForm)
+            selectionStep(title: "Choose the Medication Type", sections: [("Common Forms", Array(medicineForms.prefix(4))), ("More Forms", Array(medicineForms.dropFirst(4)))], selection: Binding(
+                get: { medicineForm },
+                set: { selectMedicineForm($0) }
+            ))
         case .strength:
             inputStep(title: "Add the Medication Strength") {
                 Text("Strength")
@@ -162,8 +168,7 @@ struct AddMedicineView: View {
             inputStep(title: "How Much Do You Have?") {
                 Text("Quantity")
                     .font(.title3.bold())
-                roundedTextField("10", text: $quantity)
-                    .keyboardType(.numberPad)
+                quantitySelector
                 Text("Unit")
                     .font(.title3.bold())
                     .padding(.top, 12)
@@ -267,6 +272,86 @@ struct AddMedicineView: View {
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
+    private var quantitySelector: some View {
+        VStack(spacing: 14) {
+            HStack(spacing: 18) {
+                Button {
+                    adjustQuantity(by: -10)
+                } label: {
+                    Image(systemName: "minus")
+                        .font(.title2.bold())
+                        .frame(width: 54, height: 54)
+                        .background(Color(.tertiarySystemGroupedBackground))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+                .disabled(currentQuantity <= 0)
+                .opacity(currentQuantity <= 0 ? 0.35 : 1)
+
+                Spacer(minLength: 8)
+
+                VStack(spacing: 6) {
+                    if isEditingQuantityManually {
+                        TextField("0", text: $manualQuantityText)
+                            .font(.system(size: 46, weight: .bold, design: .rounded))
+                            .multilineTextAlignment(.center)
+                            .keyboardType(.numberPad)
+                            .focused($isManualQuantityFocused)
+                            .onChange(of: manualQuantityText) {
+                                manualQuantityText = manualQuantityText.filter { $0.isNumber }
+                            }
+                            .onSubmit {
+                                commitManualQuantity()
+                            }
+                    } else {
+                        Text("\(currentQuantity)")
+                            .font(.system(size: 52, weight: .bold, design: .rounded))
+                            .contentTransition(.numericText())
+                            .onTapGesture(count: 2) {
+                                beginManualQuantityEntry()
+                            }
+                    }
+
+                    Text(quantityUnit)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.secondary)
+                }
+                .frame(minWidth: 120)
+
+                Spacer(minLength: 8)
+
+                Button {
+                    adjustQuantity(by: 10)
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.title2.bold())
+                        .frame(width: 54, height: 54)
+                        .background(Color.blue.opacity(0.14))
+                        .clipShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
+
+            Text("Double-tap the number to type a custom quantity.")
+                .font(.footnote)
+                .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .padding(18)
+        .background(Color(.secondarySystemGroupedBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .toolbar {
+            if isManualQuantityFocused {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") {
+                        commitManualQuantity()
+                    }
+                }
+            }
+        }
+    }
+
     private var reviewStep: some View {
         VStack(alignment: .leading, spacing: 22) {
             Text("Review & Save")
@@ -337,7 +422,8 @@ struct AddMedicineView: View {
         case .form:
             return !medicineForm.isEmpty
         case .quantity:
-            return Int16(quantity.trimmingCharacters(in: .whitespacesAndNewlines)) != nil
+            guard let value = Int16(quantity.trimmingCharacters(in: .whitespacesAndNewlines)) else { return false }
+            return value >= 0
         default:
             return true
         }
@@ -346,6 +432,10 @@ struct AddMedicineView: View {
     private var strengthSummary: String {
         let trimmedStrength = strengthValue.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmedStrength.isEmpty ? "" : "\(trimmedStrength) \(strengthUnit)"
+    }
+
+    private var currentQuantity: Int {
+        max(Int(quantity.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0, 0)
     }
 
     private var headerIconName: String {
@@ -361,6 +451,10 @@ struct AddMedicineView: View {
     }
 
     private func goNext() {
+        if step == .quantity, isEditingQuantityManually {
+            commitManualQuantity()
+        }
+
         withAnimation(.easeInOut) {
             step = step.next
         }
@@ -382,6 +476,54 @@ struct AddMedicineView: View {
             pendingImage = nil
         }
         goNext()
+    }
+
+    private func selectMedicineForm(_ form: String) {
+        medicineForm = form
+        quantityUnit = defaultQuantityUnit(for: form)
+    }
+
+    private func defaultQuantityUnit(for form: String) -> String {
+        switch form {
+        case "Capsule":
+            return "capsules"
+        case "Tablet":
+            return "tablets"
+        case "Liquid", "Drops":
+            return "bottles"
+        case "Topical", "Cream":
+            return "tubes"
+        case "Injection":
+            return "doses"
+        case "Device", "Other":
+            return "units"
+        default:
+            return "units"
+        }
+    }
+
+    private func adjustQuantity(by amount: Int) {
+        let nextQuantity = max(currentQuantity + amount, 0)
+        quantity = "\(nextQuantity)"
+        manualQuantityText = quantity
+        HapticsManager.impact(.light)
+    }
+
+    private func beginManualQuantityEntry() {
+        manualQuantityText = quantity
+        isEditingQuantityManually = true
+
+        DispatchQueue.main.async {
+            isManualQuantityFocused = true
+        }
+    }
+
+    private func commitManualQuantity() {
+        let sanitized = manualQuantityText.filter { $0.isNumber }
+        quantity = "\(max(Int(sanitized) ?? 0, 0))"
+        manualQuantityText = quantity
+        isEditingQuantityManually = false
+        isManualQuantityFocused = false
     }
     
     private func saveMedicine() {

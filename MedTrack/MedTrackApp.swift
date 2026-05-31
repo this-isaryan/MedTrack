@@ -26,7 +26,7 @@ struct MedTrackApp: App {
     var body: some Scene {
         WindowGroup {
             TabView(selection: $selectedTab) {
-                NavigationView {
+                NavigationStack {
                     HomeView()
                 }
                 .tabItem {
